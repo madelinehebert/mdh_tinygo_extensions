@@ -1,7 +1,5 @@
 package mdh_tinygo_extensions
 
-import "machine"
-
 // Constants needed to control direction
 const (
 	FORWARDS  bool = true
