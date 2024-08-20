@@ -9,15 +9,15 @@ const (
 )
 
 // Motor structs
-type motor struct {
-	directionPin machine.Pin
-	speedPin     machine.Pin
-	pwmPin       machine.PWM
-	pwmCh        uint8
+type Motor struct {
+	DirectionPin machine.Pin
+	SpeedPin     machine.Pin
+	PwmPin       machine.PWM
+	PwmCh        uint8
 }
 
 // Motor automagical configuration function
-func (m motor) ConfigureAll() error {
+func (m Motor) ConfigureAll() error {
 	m.ConfigureAnalog()
 	m.ConfigurePWM()
 	if err := m.ConfigurePWMChannel(); err != nil {
@@ -28,14 +28,14 @@ func (m motor) ConfigureAll() error {
 }
 
 // Motor autoconfiguration function for analog pins
-func (m motor) ConfigureAnalog() {
-	m.directionPin.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	m.speedPin.Configure(machine.PinConfig{Mode: machine.PinOutput})
+func (m Motor) ConfigureAnalog() {
+	m.DirectionPin.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	m.SpeedPin.Configure(machine.PinConfig{Mode: machine.PinOutput})
 }
 
 // Motor autoconfiguration function for pwm pins
-func (m motor) ConfigurePWM() {
-	pwm := m.pwmPin
+func (m Motor) ConfigurePWM() {
+	pwm := m.PwmPin
 	err := pwm.Configure(machine.PWMConfig{})
 	if err != nil {
 		println(err.Error())
@@ -43,36 +43,36 @@ func (m motor) ConfigurePWM() {
 }
 
 // Motor autoconfiguration function for pwm channels
-func (m motor) ConfigurePWMChannel() error {
-	ch, err := m.pwmPin.Channel(m.speedPin)
+func (m Motor) ConfigurePWMChannel() error {
+	ch, err := m.PwmPin.Channel(m.SpeedPin)
 	if err != nil {
 		println(err.Error())
 		return err
 	} else {
-		m.pwmCh = ch
+		m.PwmCh = ch
 		return nil
 	}
 }
 
 // Motor direction function
-func (m motor) SetDirection(direction bool) {
+func (m Motor) SetDirection(direction bool) {
 	// Fork logic based on input
 	if direction {
 		//Map High to True (Forwards)
-		m.directionPin.High()
+		m.DirectionPin.High()
 	} else {
 		//Map Low to False (Backwards)
-		m.directionPin.Low()
+		m.DirectionPin.Low()
 	}
 }
 
 // Motor direction function
-func (m motor) GetDirection() bool {
+func (m Motor) GetDirection() bool {
 	//Return current value of directionPin
-	return m.directionPin.Get()
+	return m.DirectionPin.Get()
 }
 
 // Motor function to set speed
-func (m motor) SetSpeed(speed uint32) {
-	m.pwmPin.Set(m.pwmCh, speed)
+func (m Motor) SetSpeed(speed uint32) {
+	m.PwmPin.Set(m.PwmCh, speed)
 }
