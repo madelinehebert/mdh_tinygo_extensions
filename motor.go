@@ -8,11 +8,13 @@ import (
 const (
 	FORWARDS  bool = true
 	RIGHT     bool = true
+	MOTOR0    bool = true
 	BACKWARDS bool = false
 	LEFT      bool = false
+	MOTOR1    bool = false
 )
 
-// Motor struct
+// Motor struct - represents a single motor port on a motor controllers
 type Motor struct {
 	BrakePin     machine.Pin
 	DirectionPin machine.Pin
@@ -21,7 +23,7 @@ type Motor struct {
 	PwmCh        uint8
 }
 
-// Vehicle struct
+// Vehicle struct - a vehicle is both ports on a motor controller
 type Vehicle struct {
 	M0 Motor
 	M1 Motor
@@ -177,4 +179,16 @@ func (v Vehicle) ConfigureEverything() error {
 	v.M1.PwmPin.Set(ch1, uint32(255))
 
 	return nil
+}
+
+// Vehicle function to set direction for all motors
+func (v Vehicle) SetDirectionAll(direction bool) {
+	v.M0.SetDirection(direction)
+	v.M1.SetDirection(direction)
+}
+
+// Vehicle function to set direction for each motor individually
+func (v Vehicle) SetDirection(direction0 bool, direction1 bool) {
+	v.M0.SetDirection(direction0)
+	v.M1.SetDirection(direction1)
 }
