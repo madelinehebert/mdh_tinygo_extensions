@@ -16,11 +16,13 @@ const (
 
 // Motor struct - represents a single motor port on a motor controllers
 type Motor struct {
-	BrakePin     machine.Pin
-	DirectionPin machine.Pin
-	SpeedPin     machine.Pin
-	PwmPin       machine.PWM
-	PwmCh        uint8
+	BrakePin           machine.Pin //The motor's brake pin
+	DirectionPin       machine.Pin //The morot's direction pin
+	SpeedPin           machine.Pin //The motor's speed pin
+	PwmPin             machine.PWM //The motor's PWM timer
+	PwmCh              uint8       //The PWM timer's channel
+	ForwardDirection   bool        //The direction to use as forward; Useful to correct polarity
+	BackwardsDirection bool        //The direction to use as backwards; Useful to correct polarity
 }
 
 // Vehicle struct - a vehicle is both ports on a motor controller
@@ -123,14 +125,14 @@ func (m Motor) Start() {
 
 // Vehicle function to turn right - assumes m0 is left motor and m1 is right motor
 func (v Vehicle) TurnRight() {
-	v.M0.SetDirection(FORWARDS)
-	v.M1.SetDirection(BACKWARDS)
+	v.M0.SetDirection(v.M0.ForwardDirection)
+	v.M1.SetDirection(!v.M0.ForwardDirection)
 }
 
 // Vehicle function to turn right - assumes m0 is left motor and m1 is right motor
 func (v Vehicle) TurnLeft() {
-	v.M0.SetDirection(BACKWARDS)
-	v.M1.SetDirection(FORWARDS)
+	v.M0.SetDirection(!v.M0.ForwardDirection)
+	v.M1.SetDirection(v.M0.ForwardDirection)
 }
 
 // Vehicle automagical configuration function
@@ -191,4 +193,14 @@ func (v Vehicle) SetDirectionAll(direction bool) {
 func (v Vehicle) SetDirection(direction0 bool, direction1 bool) {
 	v.M0.SetDirection(direction0)
 	v.M1.SetDirection(direction1)
+}
+
+func (v Vehicle) GoForwards() {
+	v.M0.SetDirection(v.M0.ForwardDirection)
+	v.M1.SetDirection(v.M1.ForwardDirection)
+}
+
+func (v Vehicle) GoBackwards() {
+	v.M0.SetDirection(!v.M0.ForwardDirection)
+	v.M1.SetDirection(!v.M1.ForwardDirection)
 }
