@@ -8,27 +8,20 @@ import (
 const (
 	FORWARDS  bool = true
 	RIGHT     bool = true
-	MOTOR0    bool = true
+	MOTOR0    bool = true //Left Motor
 	BACKWARDS bool = false
 	LEFT      bool = false
-	MOTOR1    bool = false
+	MOTOR1    bool = false //Right motor
 )
 
 // Motor struct - represents a single motor port on a motor controllers
 type Motor struct {
-	BrakePin           machine.Pin //The motor's brake pin
-	DirectionPin       machine.Pin //The morot's direction pin
-	SpeedPin           machine.Pin //The motor's speed pin
-	PwmPin             machine.PWM //The motor's PWM timer
-	PwmCh              uint8       //The PWM timer's channel
-	ForwardDirection   bool        //The direction to use as forward; Useful to correct polarity
-	BackwardsDirection bool        //The direction to use as backwards; Useful to correct polarity
-}
-
-// Vehicle struct - a vehicle is both ports on a motor controller
-type Vehicle struct {
-	M0 Motor
-	M1 Motor
+	BrakePin         machine.Pin //The motor's brake pin
+	DirectionPin     machine.Pin //The motor's direction pin
+	SpeedPin         machine.Pin //The motor's speed pin
+	PwmPin           machine.PWM //The motor's PWM timer
+	PwmCh            uint8       //The PWM timer's channel
+	ForwardDirection bool        //The direction to use as forward; Useful to correct polarity
 }
 
 // Motor automagical configuration function for everything needed to get a single motor up and running ASAP
@@ -48,7 +41,7 @@ func (m Motor) ConfigureEverything() error {
 }
 
 // Motor automagical configuration function for just the pins
-func (m Motor) ConfigureAll() error {
+func (m Motor) ConfigurePins() error {
 	m.ConfigureAnalog()
 
 	if err := m.ConfigurePWM(); err != nil {
@@ -114,93 +107,11 @@ func (m Motor) SetSpeed(speed uint32) {
 // Motor function to stop a motor
 func (m Motor) Stop() {
 	m.BrakePin.High()
+	m.SetSpeed(0)
 }
 
 // Motor function to start a motor from a stopped state
 func (m Motor) Start() {
 	m.BrakePin.Low()
-}
-
-// Vehicle Functions
-
-// Vehicle function to turn right - assumes m0 is left motor and m1 is right motor
-func (v Vehicle) TurnRight() {
-	v.M0.SetDirection(v.M0.ForwardDirection)
-	v.M1.SetDirection(!v.M0.ForwardDirection)
-}
-
-// Vehicle function to turn right - assumes m0 is left motor and m1 is right motor
-func (v Vehicle) TurnLeft() {
-	v.M0.SetDirection(!v.M0.ForwardDirection)
-	v.M1.SetDirection(v.M0.ForwardDirection)
-}
-
-// Vehicle automagical configuration function
-func (v Vehicle) ConfigureEverything() error {
-
-	// Configure M0 Direction Pin
-	v.M0.DirectionPin.Configure(machine.PinConfig{Mode: machine.PinOutput})
-
-	// Configure M1 Direction Pin
-	v.M1.DirectionPin.Configure(machine.PinConfig{Mode: machine.PinOutput})
-
-	// Configure M0 PWM pin
-	err := v.M0.PwmPin.Configure(machine.PWMConfig{})
-	if err != nil {
-		return err
-	}
-
-	// Configure channel on M0
-	ch0, err := v.M0.PwmPin.Channel(v.M0.SpeedPin)
-	if err != nil {
-		return err
-	} else {
-		v.M0.PwmCh = ch0
-	}
-
-	// Configure M1 PWM pin
-	err = v.M1.PwmPin.Configure(machine.PWMConfig{})
-	if err != nil {
-		return err
-	}
-
-	// Configure channel on M1
-	ch1, err := v.M1.PwmPin.Channel(v.M1.SpeedPin)
-	if err != nil {
-		return err
-	} else {
-		v.M1.PwmCh = ch1
-	}
-
-	// Set direction for both motors
-	v.M0.DirectionPin.High()
-	v.M1.DirectionPin.High()
-
-	// Toggle the motors!
-	v.M0.PwmPin.Set(ch0, uint32(255))
-	v.M1.PwmPin.Set(ch1, uint32(255))
-
-	return nil
-}
-
-// Vehicle function to set direction for all motors
-func (v Vehicle) SetDirectionAll(direction bool) {
-	v.M0.SetDirection(direction)
-	v.M1.SetDirection(direction)
-}
-
-// Vehicle function to set direction for each motor individually
-func (v Vehicle) SetDirection(direction0 bool, direction1 bool) {
-	v.M0.SetDirection(direction0)
-	v.M1.SetDirection(direction1)
-}
-
-func (v Vehicle) GoForwards() {
-	v.M0.SetDirection(v.M0.ForwardDirection)
-	v.M1.SetDirection(v.M1.ForwardDirection)
-}
-
-func (v Vehicle) GoBackwards() {
-	v.M0.SetDirection(!v.M0.ForwardDirection)
-	v.M1.SetDirection(!v.M1.ForwardDirection)
+	m.SetSpeed(255)
 }
