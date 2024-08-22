@@ -30,11 +30,14 @@ func (m Motor) ConfigureEverything() error {
 	if err := m.ConfigurePWM(); err != nil {
 		return err
 	}
-	if err := m.ConfigurePWMChannel(); err != nil {
+
+	if ch, err := m.PwmPin.Channel(m.SpeedPin); err != nil {
 		return err
+	} else {
+		m.PwmCh = ch
 	}
 
-	m.SetDirection(FORWARDS)
+	m.SetDirection(m.ForwardDirection)
 	m.SetSpeed(255)
 
 	return nil
@@ -48,8 +51,10 @@ func (m Motor) ConfigurePins() error {
 		return err
 	}
 
-	if err := m.ConfigurePWMChannel(); err != nil {
+	if ch, err := m.PwmPin.Channel(m.SpeedPin); err != nil {
 		return err
+	} else {
+		m.PwmCh = ch
 	}
 
 	return nil
@@ -72,6 +77,7 @@ func (m Motor) ConfigurePWM() error {
 }
 
 // Motor autoconfiguration function for pwm channels
+/*
 func (m Motor) ConfigurePWMChannel() error {
 	if ch, err := m.PwmPin.Channel(m.SpeedPin); err != nil {
 		return err
@@ -80,7 +86,7 @@ func (m Motor) ConfigurePWMChannel() error {
 		return nil
 	}
 }
-
+*/
 // Motor direction function
 func (m Motor) SetDirection(direction bool) {
 	// Fork logic based on input

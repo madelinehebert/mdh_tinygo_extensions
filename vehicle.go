@@ -1,7 +1,5 @@
 package mdh_tinygo_extensions
 
-import "machine"
-
 // Vehicle struct - a vehicle is both ports on a motor controller
 type Vehicle struct {
 	M0 Motor
@@ -25,47 +23,13 @@ func (v Vehicle) TurnLeft() {
 // Vehicle automagical configuration function
 func (v Vehicle) ConfigureEverything() error {
 
-	// Configure M0 Direction Pin
-	v.M0.DirectionPin.Configure(machine.PinConfig{Mode: machine.PinOutput})
-
-	// Configure M1 Direction Pin
-	v.M1.DirectionPin.Configure(machine.PinConfig{Mode: machine.PinOutput})
-
-	// Configure M0 PWM pin
-	err := v.M0.PwmPin.Configure(machine.PWMConfig{})
-	if err != nil {
+	if err := v.M0.ConfigureEverything(); err != nil {
 		return err
 	}
 
-	// Configure channel on M0
-	ch0, err := v.M0.PwmPin.Channel(v.M0.SpeedPin)
-	if err != nil {
-		return err
-	} else {
-		v.M0.PwmCh = ch0
-	}
-
-	// Configure M1 PWM pin
-	err = v.M1.PwmPin.Configure(machine.PWMConfig{})
-	if err != nil {
+	if err := v.M1.ConfigureEverything(); err != nil {
 		return err
 	}
-
-	// Configure channel on M1
-	ch1, err := v.M1.PwmPin.Channel(v.M1.SpeedPin)
-	if err != nil {
-		return err
-	} else {
-		v.M1.PwmCh = ch1
-	}
-
-	// Set direction for both motors
-	v.M0.SetDirection(v.M0.ForwardDirection)
-	v.M1.SetDirection(v.M1.ForwardDirection)
-
-	// Toggle the motors!
-	v.M0.PwmPin.Set(ch0, uint32(255))
-	v.M1.PwmPin.Set(ch1, uint32(255))
 
 	return nil
 }
